@@ -11,13 +11,15 @@ namespace BasicGarageSystem
     {
 
         static void MainMenu() {
+            
+
 
         }
 
 
         static void Main(string[] args)
         {
-            MainMenu()       
+            MainMenu();       
                 
         }
     }
