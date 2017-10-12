@@ -10,10 +10,7 @@ namespace BasicGarageSystem
     {
         public Car()
         {
-            vehicleType = "Car";
-            regNr = " ";
-            dateTime = " ";
-            parkingSpot = ' ';
+            vehicleType = v_Vehicle.Car;
             vehicleSize = '1';
         }
     }

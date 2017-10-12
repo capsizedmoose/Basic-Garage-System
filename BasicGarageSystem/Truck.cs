@@ -10,11 +10,8 @@ namespace BasicGarageSystem
     {
         public Truck()
         {
-            vehicleType = "Truck";
-            regNr = " ";
-            dateTime = " ";
-            parkingSpot = ' ';
-            vehicleSize = '1';
+            vehicleType = v_Vehicle.Truck;
+            vehicleSize = '3';
         }
     }
 }

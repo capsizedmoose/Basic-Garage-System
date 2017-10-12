@@ -11,10 +11,7 @@ namespace BasicGarageSystem
         public MC()
         {
 
-            vehicleType = "MC";
-            regNr = " ";
-            dateTime = " ";
-            parkingSpot = ' ';
+            vehicleType = v_Vehicle.MC;
             vehicleSize = '1';
         }
     }
