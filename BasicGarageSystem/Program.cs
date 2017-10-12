@@ -10,19 +10,15 @@ namespace BasicGarageSystem
     class Program
     {
 
-        static void Menu() {
-
-            
-
-
+        static void MainMenu() {
 
         }
 
 
-
-
         static void Main(string[] args)
         {
+            MainMenu()       
+                
         }
     }
 }
