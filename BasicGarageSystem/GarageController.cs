@@ -35,7 +35,7 @@ namespace BasicGarageSystem
             }
         }
 
-        // Prints out a singe vheicle that matches the given registration number
+        // Prints out a single vheicle that matches the given registration number
         // string regNr = the registration number for the vehicle
         public void PrintVehicle(string regNr)
         {
