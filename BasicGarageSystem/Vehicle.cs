@@ -8,7 +8,7 @@ namespace BasicGarageSystem
 {
     class Vehicle
     {
-        public string vehicleType { get; set; }
+        public v_Vehicle vehicleType { get; set; }
         public string regNr { get; set; }
         public string dateTime { get; set; }
         public int parkingSpot { get; set; }
