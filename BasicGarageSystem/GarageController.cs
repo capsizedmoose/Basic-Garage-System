@@ -6,6 +6,16 @@ using System.Threading.Tasks;
 
 namespace BasicGarageSystem
 {
+    public enum Vehicle
+    {
+        Bus,
+        Car,
+        MC,
+        Truck
+        
+        
+    }
+
     class GarageController
     {
         List<Vehicle> m_Vehicles; // maybe make a new list class later?
