@@ -10,10 +10,7 @@ namespace BasicGarageSystem
     {
         public Bus()
         {
-            vehicleType = "Bus";
-            regNr = " ";
-            dateTime = " ";
-            parkingSpot = ' ';
+            vehicleType = v_Vehicle.Bus;
             vehicleSize = '3';
         }
            
