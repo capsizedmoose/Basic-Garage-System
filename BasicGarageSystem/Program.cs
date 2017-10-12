@@ -25,6 +25,6 @@ namespace BasicGarageSystem
             Console.ReadKey();
             Console.ReadKey();
         }
-        public string = _randomNumber;
+        
     }
 }
