@@ -17,8 +17,31 @@ namespace BasicGarageSystem
 
         static void Main(string[] args)
         {
-            MainMenu();       
-                
+            MainMenu();
+
+
+            var garage = new GarageController();
+
+            Random randomNumber = new Random();
+            int num;
+            string regNum = "";
+
+            for (int i = 0; i < 3; i++)
+            {
+                num = randomNumber.Next(97, 122);
+                regNum += (char)num;
+            }
+
+            for (int i = 0; i < 3; i++)
+            {
+                num = randomNumber.Next(0, 9);
+                regNum += num;
+            }
+
+            Console.WriteLine(regNum.ToUpper());
+
+            Console.ReadKey();
+
         }
     }
 }
