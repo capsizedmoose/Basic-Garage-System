@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BasicGarageSystem
 {
-    public enum Vehicle
+    public enum v_Vehicle
     {
         Bus,
         Car,
