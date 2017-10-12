@@ -44,8 +44,10 @@
   <ItemGroup>
     <Compile Include="Bus.cs" />
     <Compile Include="Car.cs" />
+    <Compile Include="DisplayController.cs" />
     <Compile Include="GarageController.cs" />
     <Compile Include="HelperClass.cs" />
+    <Compile Include="Menu.cs" />
     <Compile Include="MC.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
