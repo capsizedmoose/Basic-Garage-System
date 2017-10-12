@@ -10,7 +10,7 @@ namespace BasicGarageSystem
     class DisplayController
     {
 
-        public Stack<string> DisplayList { get; set; }
+        public List<string> DisplayList { get; set; }
 
         public int Layer{ get; set;}
         public int CursorPos { get; set; }
@@ -18,26 +18,31 @@ namespace BasicGarageSystem
 
         public DisplayController()
         {
-            DisplayList = new Stack<string>();
+            DisplayList = new List<string>();
             Layer = 0;
         }
 
         public void WriteLine(string s) {
 
-            DisplayList.Push(s);
+            DisplayList.Add(s);
 
         }
 
         public void RemoveLine() {
-            DisplayList.Pop();
+            DisplayList.RemoveAt(DisplayList.Count-1);
         }
 
         public void UpdateDisplay() {
 
+            Console.Clear();
+
             int i = 0;
+
             foreach (string s in DisplayList) {
+
                 string stringIndentation = "";
-                for (int j = 0; j < i && j < Layer ; i++)
+
+                for (int j = 0; j < i && j < Layer && j < 10; j++)
                 {
                     stringIndentation += " ";
                 }
@@ -52,7 +57,7 @@ namespace BasicGarageSystem
                 }
                 else
                 {
-                    if (CursorPos + Layer + 1 == i)
+                    if (CursorPos + Layer == i)
                     {
                         CngBCol(ConsoleColor.White);
                         CngFCol(ConsoleColor.Black);
@@ -64,8 +69,12 @@ namespace BasicGarageSystem
                     }
                 }
                 Console.WriteLine(stringIndentation+s);
-            }
 
+
+                CngBCol(ConsoleColor.Black);
+                CngFCol(ConsoleColor.White);
+                i++;
+            }
 
         }
 
@@ -89,7 +98,7 @@ namespace BasicGarageSystem
                         }
                         break;
                     case ConsoleKey.DownArrow:
-                        if (CursorPos < range)
+                        if (CursorPos < range-1)
                         {
                             CursorPos++;
                         }

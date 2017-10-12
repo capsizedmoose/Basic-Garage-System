@@ -13,57 +13,101 @@ namespace BasicGarageSystem
         public string[] Answers { get; set; }
         public int Length { get; set; }
 
-        public Menu(string titel,string[] answers,DisplayController dc)
-        {
-            Answers = answers;
-            Length = Answers.Length;
-            Titel = titel;
-
-
-            dc.Layer++;
+        public void initiateDisplay(DisplayController dc){
 
             dc.WriteLine(Titel);
             foreach (string a in Answers)
             {
                 dc.WriteLine(a);
             }
+
         }
 
-        private void resetDisplay(DisplayController dc)
+        public void resetDisplay(DisplayController dc)
         {
-
-            dc.Layer--;
-
-            for (int i = 0; i < Length; i++) {
+            foreach (string a in Answers)
+            {
                 dc.RemoveLine();
             }
         }
 
+        public int GetAnswer(DisplayController dc) {
+            initiateDisplay(dc);
+            int nav = dc.GetInput(Length);
+            resetDisplay(dc);
+            return nav;
+        }
+
+
 
     }
-    class MainMenu : Menu {
-
-
-        public MainMenu(string titel, string[] answers, DisplayController dc) : base(titel, answers, dc)
+    class MenuMain : Menu
+    {
+        public MenuMain(DisplayController dc)
         {
-
             Titel = "Main Menu:";
             Answers = new string[] {
+                "Exit",
                 "Check In Vehicle",
-                "Search"
+
+
+                "Search",
             };
+            dc.Layer++;
             Length = Answers.Length;
+            int nav = 0;
+            do {
+                nav = GetAnswer(dc);
+                switch (nav)
+                {
+                    case 1:
+                        new MenuCheckIn
+                            (dc);
+                        break;
+                    case 0:
+                        break;
 
+                    default:
+                        break;
+                }
+                dc.RemoveLine();
+                dc.UpdateDisplay();
+            } while (nav != 0);
+            dc.Layer--;
+            dc.UpdateDisplay();
+        }
+    }
+    class MenuCheckIn : Menu
+    {
+        public MenuCheckIn(DisplayController dc)
+        {
+            Titel = "Check In Vehicle:";
+            Answers = new string[] {
+                "Back",
+                "DEEPER"
+            };
+            dc.Layer++;
+            Length = Answers.Length;
+            int nav = 0;
+            do
+            {
+                nav = GetAnswer(dc);
+                switch (nav)
+                {
+                    case 1:
+                        new MenuCheckIn(dc);
+                        break;
+                    case 0:
+                        break;
 
-
-
-
-            int nav = dc.GetInput(Length);
-            switch (nav) {
-                case 0:
-                    break;
-            }
-
+                    default:
+                        break;
+                }
+                dc.RemoveLine();
+                dc.UpdateDisplay();
+            } while (nav != 0);
+            dc.Layer--;
+            dc.UpdateDisplay();
         }
     }
 }
