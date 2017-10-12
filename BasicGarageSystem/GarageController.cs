@@ -18,7 +18,14 @@ namespace BasicGarageSystem
 
     class GarageController
     {
-        List<Vehicle> m_Vehicles; // maybe make a new list class later?
+        List<Vehicle> m_Vehicles = new List<Vehicle>()
+        {
+            new Vehicle{ vehicleType="Bus", regNr=" ", dateTime=" ", parkingSpot=' ',  vehicleSize='3'},
+            new Vehicle{ vehicleType="Car", regNr=" ", dateTime=" ", parkingSpot=' ',  vehicleSize='1'},
+            new Vehicle{ vehicleType="MC", regNr=" ", dateTime=" ", parkingSpot=' ',  vehicleSize='1'},
+            new Vehicle{ vehicleType="Truck", regNr=" ", dateTime=" ", parkingSpot=' ',  vehicleSize='1'},
+
+        }; // maybe make a new list class later?
 
         // Default Constructor
         public GarageController()

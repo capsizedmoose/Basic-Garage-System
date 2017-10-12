@@ -17,8 +17,9 @@ namespace BasicGarageSystem
 
         static void Main(string[] args)
         {
-            MainMenu();       
-                
+            MainMenu();
+
+            Console.ReadKey();
         }
     }
 }
