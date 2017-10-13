@@ -21,7 +21,7 @@ namespace BasicGarageSystem
         }
 
         public string BasicInfo() {
-            return vehicleType + "\t:" + regNr;
+            return regNr + ":" + vehicleType;
         }
 
 

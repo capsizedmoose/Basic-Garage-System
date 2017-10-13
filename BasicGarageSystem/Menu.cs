@@ -42,6 +42,17 @@ namespace BasicGarageSystem
 
 
     }
+
+    class MenuVehicles : Menu
+    {
+        public MenuVehicles(DisplayController dc, GarageController gc, string[] vehicles)
+        {
+            Titel = "Main Menu:";
+            Answers = new string[vehicles.Length + 1];
+            new string
+        }
+    }
+
     class MenuMain : Menu
     {
         public MenuMain(DisplayController dc, GarageController gc)
@@ -50,10 +61,21 @@ namespace BasicGarageSystem
             Answers = new string[] {
                 "Exit",
                 "Check In Vehicle",
-                "Search Registration Number",
+                "Search For Vehicle",
             };
             dc.Layer++;
             Length = Answers.Length;
+
+
+            dc.WriteLine(Titel);
+            string searchString = GetInput(false);
+
+
+
+
+
+
+
             int nav = 0;
             do
             {
@@ -64,7 +86,7 @@ namespace BasicGarageSystem
                         new MenuCheckIn(dc,gc);
                         break;
                     case 2:
-                        new MenuCheckIn(dc,gc);
+                        new MenuMain(dc,gc);
                         break;
 
                     case 0:
@@ -78,11 +100,12 @@ namespace BasicGarageSystem
             dc.UpdateDisplay();
         }
     }
+
     class MenuSearchRegNr : Menu
     {
         public MenuSearchRegNr(DisplayController dc, GarageController gc)
         {
-            Titel = "Search Registration Number";
+            Titel = "Search By Regnr";
             Answers = new string[] {
                 "Back",
                 "Checkout" 
@@ -115,6 +138,7 @@ namespace BasicGarageSystem
             dc.UpdateDisplay();
         }
     }
+
     class MenuCheckIn : Menu
     {
         public MenuCheckIn(DisplayController dc, GarageController gc)
@@ -122,7 +146,11 @@ namespace BasicGarageSystem
             Titel = "Check In Vehicle:";
             Answers = new string[] {
                 "Back",
-                "Check in a random vehicle"
+                "Check in a random vehicle",
+                "Check in a random Car",
+                "Check in a random Motorcycle",
+                "Check in a random Truck",
+                "Check in a random Bus",
             };
             dc.Layer++;
             Length = Answers.Length;
@@ -134,6 +162,18 @@ namespace BasicGarageSystem
                 {
                     case 1:
                         dc.InfoText = gc.ParkNewVehicle();
+                        break;
+                    case 2:
+                        dc.InfoText = gc.ParkVehicle(v_Vehicle.Car);
+                        break;
+                    case 3:
+                        dc.InfoText = gc.ParkVehicle(v_Vehicle.MC);
+                        break;
+                    case 4:
+                        dc.InfoText = gc.ParkVehicle(v_Vehicle.Truck);
+                        break;
+                    case 5:
+                        dc.InfoText = gc.ParkVehicle(v_Vehicle.Bus);
                         break;
                     case 0:
                         break;

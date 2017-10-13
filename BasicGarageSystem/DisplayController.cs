@@ -39,6 +39,9 @@ namespace BasicGarageSystem
             Console.Clear();
 
 
+            CngBCol(ConsoleColor.Black);
+            CngFCol(ConsoleColor.Gray);
+            Console.WriteLine("___________________________________________");
             Console.WriteLine(InfoText);
             Console.WriteLine("___________________________________________");
 
@@ -78,16 +81,29 @@ namespace BasicGarageSystem
 
 
                 CngBCol(ConsoleColor.Black);
-                CngFCol(ConsoleColor.White);
+                CngFCol(ConsoleColor.Gray);
                 i++;
             }
             Console.WriteLine("___________________________________________");
+
+            CngBCol(ConsoleColor.Black);
+            CngFCol(ConsoleColor.);
             if (gc != null)
             {
-
-                Console.WriteLine();
+                int temp = 0;
+                foreach (string s in gc.PrintAll())
+                {
+                    Console.Write(s+"\t");
+                    temp++;
+                    if (temp >= 4){
+                        temp = 0;
+                        Console.WriteLine();
+                    }
+                }
             }
 
+            CngBCol(ConsoleColor.Black);
+            CngFCol(ConsoleColor.White);
 
         }
 
