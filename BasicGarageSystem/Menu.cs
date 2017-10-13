@@ -218,9 +218,14 @@ namespace BasicGarageSystem
             dc.Layer++;
             dc.WriteLine(Titel);
             dc.UpdateDisplay();
+            Console.WriteLine("\n INPUT REGNR: ");
             string searchString = GetInput(false);
-            if (gc.FindVehicle(searchString.ToUpper()) != null) {
-                new MenuThisVehicle(dc,gc,gc.FindVehicle(searchString.ToUpper()));
+            if (gc.FindVehicle(searchString.ToUpper()) != null)
+            {
+                new MenuThisVehicle(dc, gc, gc.FindVehicle(searchString.ToUpper()));
+            }
+            else {
+                dc.InfoText = "No car with that RegNr is parked in the garage";
             }
             dc.RemoveLine();
             dc.Layer--;

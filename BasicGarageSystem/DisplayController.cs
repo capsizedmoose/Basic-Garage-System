@@ -14,6 +14,7 @@ namespace BasicGarageSystem
         public GarageController gc { get; set; }
         public int Layer{ get; set;}
         public int CursorPos { get; set; }
+        public int CursorPosX { get; set; }
         public string InfoText { get; set; }
 
 
@@ -87,13 +88,34 @@ namespace BasicGarageSystem
             Console.WriteLine("___________________________________________");
 
             CngBCol(ConsoleColor.Black);
-            CngFCol(ConsoleColor.White);
+            CngFCol(ConsoleColor.Gray);
+
             if (gc != null)
             {
                 int temp = 0;
                 foreach (string s in gc.PrintAll())
                 {
-                    Console.Write(s+"\t");
+                    CngFCol(ConsoleColor.White);
+                    Console.Write(s.Substring(0,7));
+                    switch (s.Substring(7))
+                    {
+                        case "Car":
+                            CngFCol(ConsoleColor.Cyan);
+                            break;
+                        case "Truck":
+                            CngFCol(ConsoleColor.Yellow);
+                            break;
+                        case "MC":
+                            CngFCol(ConsoleColor.Red);
+                            break;
+                        case "Bus":
+                            CngFCol(ConsoleColor.Magenta);
+                            break;
+                    }
+                    Console.Write(s.Substring(7)+"\t");
+
+
+
                     temp++;
                     if (temp >= 4){
                         temp = 0;
@@ -110,7 +132,7 @@ namespace BasicGarageSystem
         public int GetDirectionalInput(int range) {
 
             CursorPos = 0;
-
+            CursorPosX = 0;
             ConsoleKeyInfo key;
 
             UpdateDisplay();
