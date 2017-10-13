@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using System.Xml;
+using System.IO;
 
 namespace BasicGarageSystem
 {
@@ -30,7 +32,7 @@ namespace BasicGarageSystem
     {
 
         List<Vehicle> m_Vehicles; // maybe make a new list class later? 
-        List<string> m_Receipts;
+        public List<string> M_Receipts;
         //Vehicle[] m_Vehicles; // array-version
         bool[,] m_ParkingSpaces; // Making it 2-dimensional instead, would be a really strange garage if it had like 100 adjecent parking spaces
         public int NumberOfParkingSpaces { get; set; }
@@ -48,7 +50,7 @@ namespace BasicGarageSystem
         public GarageController(int x = 10, int y = 25, double parkingFee = 50, int maximumHours = 24)
         {
             m_Vehicles = new List<Vehicle>();
-            m_Receipts = new List<string>();
+            M_Receipts = new List<string>();
             //m_Vehicles = new Vehicle[num]; // the array-version
             m_ParkingSpaces = new bool[x + 1, y + 1];
             NumberOfParkingSpaces = x * y;
@@ -64,15 +66,7 @@ namespace BasicGarageSystem
         // returns a list of strings with the basic information about the vehicles
         public List<string> PrintAll()
         {
-            var vehicleStrings = new List<string>();
-
-            foreach (var vehicle in m_Vehicles.Where(x => x != null))
-            {
-                // Maybe this method was only supposed to print basic information for all the vehicles?
-                vehicleStrings.Add(vehicle.BasicInfo());
-            }
-
-            return vehicleStrings;
+            return m_Vehicles.Where(v => v != null).Select(v => v.BasicInfo()).ToList();
         }
 
         // Prints out a single vehicle that matches the given registration number
@@ -80,8 +74,7 @@ namespace BasicGarageSystem
         // returns a string with all the info of the mathcing vehicle
         public string PrintVehicle(string regNr)
         {
-            Vehicle vehicle;
-            return ((vehicle = GetVehicle(regNr)) == null) ? null : m_Vehicles.Where(v => v != null && v.regNr == regNr).First().ToString();
+            return GetVehicle(regNr).ToString();
         }
 
         // Finds a specific vehicle with the given registration number 
@@ -89,8 +82,7 @@ namespace BasicGarageSystem
         // returns a string with basic info of the matching vehicle
         public string FindVehicle(string regNr)
         {
-            Vehicle vehicle;
-            return ((vehicle = GetVehicle(regNr)) == null) ? null : m_Vehicles.Where(v => v != null && v.regNr == regNr).First().BasicInfo();
+            return GetVehicle(regNr).BasicInfo();
         }
 
         // Finds all vehicles of the given type
@@ -98,13 +90,7 @@ namespace BasicGarageSystem
         // returns a string with the return message of the method
         public List<string> FindVehiclesByType(v_Vehicle type)
         {
-            var results = new List<string>();
-
-            foreach (var vehicle in m_Vehicles.Where(v => v.vehicleType == type))
-            {
-                results.Add(vehicle.BasicInfo());
-            }
-            return results;
+            return m_Vehicles.Where(v => v.vehicleType == type).Select(v => v.BasicInfo()).ToList();
         }
 
         // Adds a new Vehicle to the list of Vehicles
@@ -251,13 +237,12 @@ namespace BasicGarageSystem
 
             m_Vehicles = m_Vehicles.Where(v => v.regNr != regNr).ToList(); // remove the vehicle from the list;
 
-            string receipt = $"The vehicle with the registration number: {regNr} " +
-                $"left the garage, freeing up the parking space(s) {index.ToString()}" + (vehicle.vehicleSize > 1 ? $" to [{index.X + 1},{index.Y + vehicle.vehicleSize}]." : "." +
-                $"\nTotal hours parked: {GetTotalHours(vehicle)} and total price: {GetTotalPrice(vehicle)}.");
+            string receipt = $"Total hours parked: {GetTotalHours(vehicle)} and total price: {GetTotalPrice(vehicle)}.";
 
-            m_Receipts.Add(receipt);
+            M_Receipts.Add(receipt);
 
-            return receipt;
+            return $"The vehicle with the registration number: {regNr} " +
+                $"left the garage, freeing up the parking space(s) {index.ToString()}" + (vehicle.vehicleSize > 1 ? $" to [{index.X + 1},{index.Y + vehicle.vehicleSize}].\n" : ".\n") + receipt;
         }
 
         // Views how long a vehicle has been parked, and what the total price of the paarking fee is
@@ -281,15 +266,18 @@ namespace BasicGarageSystem
         }
 
         // Help-method tyo get the total price for a parked vehicle
+        // checks if the vehicle has been parked for linger than the maximum hours allowed, 
+        // and doubles the hourly fee then (for all hours), but doesn't send any kind of message about it atm
+        // I'll fix it if I found somethine else to add later (too lazy atm)
         private double GetTotalPrice(Vehicle vehicle)
         {
             if (vehicle == null)
             {
                 return -1;
             }
-
+            int totalHours = GetTotalHours(vehicle);
             // Total price, just at placeholder atm
-            return GetTotalHours(vehicle) * vehicle.vehicleSize * ParkingFee;
+            return totalHours * vehicle.vehicleSize * (totalHours > MaximumHours ? 2 * ParkingFee : ParkingFee);
         }
 
         // Help-method to get the total hours parked for a parked vehicle
@@ -416,12 +404,6 @@ namespace BasicGarageSystem
             return (v_Vehicle)values.GetValue(randomNumber.Next(values.Length));
         }
 
-        // Self-explanatory
-        public List<string> GetReceipts()
-        {
-            return m_Receipts;
-        }
-
         // Help-method to generate a random registration number
         // takes no arguments
         // returns a string with the generated registration number
@@ -447,23 +429,122 @@ namespace BasicGarageSystem
 
         }
 
-        // Extra stuff for later
+        // Park Vehicles from List
+        // Called when loading a garage from file
+        private void ParkVehiclesFromList(List<Vehicle> vehicles)
+        {
+            foreach (var vehicle in vehicles)
+            {
+                ParkingSpot index = vehicle.parkingSpot;
+                for (int i = 0; i < vehicle.vehicleSize; i++)
+                {
+                    m_ParkingSpaces[index.X, index.Y + i] = !m_ParkingSpaces[index.X, index.Y + i];
+                }
+
+                m_Vehicles.Add(vehicle);
+
+                //Console.WriteLine(($"The vehicle of the type: {vehicle.vehicleType.ToString()} " +
+                //$"with the registration number: {vehicle.regNr} \nwas parked in the garage at " +
+                //$"parking space(s): {index.ToString()}" + (vehicle.vehicleSize > 1 ? $" to [{index.X + 1},{index.Y + vehicle.vehicleSize}]." : "")));
+            }
+        }
+
+        // Maybe move these somewhere else, maybe a new class?
 
         // Saves the list of vehicles to a file
-        // takes no arguments
+        // takes string fileName - the file to save to
         // returns: nothing (void)
-        public void SaveGarageToFile()
+        public void SaveGarageToFile(string fileName = @"Garage.xml")
         {
-            XElement xml = new XElement("Vehicles", m_Vehicles.Select(v => new XElement("Vehicle", v)));
-            Console.WriteLine(xml);
+            XElement xml = new XElement("Garage",
+                new XElement("Info",
+                    new XAttribute("SizeX", SizeX),
+                    new XAttribute("SizeY", SizeY),
+                    new XAttribute("ParkingFee", ParkingFee),
+                    new XAttribute("MaximumHours", MaximumHours)),
+                new XElement("Vehicles", m_Vehicles.Select(v =>
+                    new XElement("Vehicle",
+                    new XAttribute("vehicleType", v.vehicleType.ToString()),
+                    new XAttribute("regNr", v.regNr),
+                    new XAttribute("dateTime", v.dateTime),
+                    new XAttribute("parkingSpot", v.parkingSpot.ToString()),
+                    new XAttribute("vehicleSize", v.vehicleSize)
+                ))));
 
+            xml.Save(XmlWriter.Create(new StringWriter()));
+            xml.Save(fileName);
         }
-        // Loads a list of vehicles from a file
-        // takes no arguments
-        // returns: nothing (void)
-        public void LoadGarageFromFile()
-        {
 
+        // Loads a list of vehicles from a file
+        // takes string fileName - the file to load from
+        // returns a bool that will be true if everything went well
+        public bool LoadGarageFromFile(string fileName = @"Garage.xml")
+        {
+            XElement xml;
+            // if the file wasn't found
+            if (!File.Exists(fileName))
+            {
+                return false;
+            }
+            xml = XElement.Load(fileName);
+
+            // find the onfo about the garage itself
+            var info = xml.Descendants("Info").Select(v => new
+            {
+                x = v.Attribute("SizeX").Value.Trim(),
+                y = v.Attribute("SizeY").Value.Trim(),
+                fee = v.Attribute("ParkingFee").Value.Trim(),
+                max = v.Attribute("MaximumHours").Value.Trim()
+            }).First();
+
+            int xSize, ySize, maxHours;
+            double parkingFee;
+            // try to parse the values
+            if (!int.TryParse(info.x, out xSize) || !int.TryParse(info.y, out ySize) || !int.TryParse(info.max, out maxHours) || !double.TryParse(info.fee, out parkingFee))
+            {
+                return false;
+            }
+
+            // assign the values
+            ParkingFee = parkingFee;
+            SizeX = xSize;
+            SizeY = ySize;
+            MaximumHours = maxHours;
+
+            Vehicle vehicle;
+            m_ParkingSpaces = new bool[SizeX, SizeY];
+
+            // start parsing the vehicles
+            var vehicles = xml.Descendants("Vehicle")
+                .Where(v => Enum.TryParse(v.Attribute("vehicleType").Value, out v_Vehicle type)
+                && int.TryParse(v.Attribute("parkingSpot").Value.Substring(v.Attribute("parkingSpot").Value.IndexOf('[') + 1, v.Attribute("parkingSpot").Value.IndexOf(',') - 1), out xSize)
+                && int.TryParse(v.Attribute("parkingSpot").Value.Substring(v.Attribute("parkingSpot").Value.IndexOf(',') + 1, v.Attribute("parkingSpot").Value.IndexOf(']') - v.Attribute("parkingSpot").Value.IndexOf(',') - 1), out ySize))
+                .Select(v => {
+                    Enum.TryParse(v.Attribute("vehicleType").Value, out v_Vehicle type);
+                    switch (type)
+                    {
+                        case v_Vehicle.Bus:
+                            vehicle = new Bus() { regNr = v.Attribute("regNr").Value, dateTime = v.Attribute("dateTime").Value, parkingSpot = new ParkingSpot() { X = xSize - 1, Y = ySize - 1 } };
+                            break;
+                        case v_Vehicle.Car:
+                            vehicle = new Car() { regNr = v.Attribute("regNr").Value, dateTime = v.Attribute("dateTime").Value, parkingSpot = new ParkingSpot() { X = xSize - 1, Y = ySize - 1 } };
+                            break;
+                        case v_Vehicle.MC:
+                            vehicle = new MC() { regNr = v.Attribute("regNr").Value, dateTime = v.Attribute("dateTime").Value, parkingSpot = new ParkingSpot() { X = xSize - 1, Y = ySize - 1 } };
+                            break;
+                        case v_Vehicle.Truck:
+                            vehicle = new Truck() { regNr = v.Attribute("regNr").Value, dateTime = v.Attribute("dateTime").Value, parkingSpot = new ParkingSpot() { X = xSize - 1, Y = ySize - 1 } };
+                            break;
+                        default:
+                            vehicle = null;
+                            break;
+                    }
+                    return vehicle;
+                }).ToList();
+
+            // Park the loaded vehicles
+            ParkVehiclesFromList(vehicles);
+            return true;
         }
     }
 }
