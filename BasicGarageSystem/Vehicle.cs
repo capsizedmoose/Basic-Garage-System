@@ -11,7 +11,7 @@ namespace BasicGarageSystem
         public v_Vehicle vehicleType { get; set; }
         public string regNr { get; set; }
         public string dateTime { get; set; }
-        public int parkingSpot { get; set; }
+        public ParkingSpot parkingSpot { get; set; }
         public int vehicleSize { get; set; }
 
 
@@ -19,6 +19,11 @@ namespace BasicGarageSystem
         {
             return vehicleType + " : " + regNr + " : " + dateTime + " : " + parkingSpot + " : " + vehicleSize + "\n";
         }
+
+        public string BasicInfo() {
+            return vehicleType + "\t:" + regNr;
+        }
+
 
     }
 }
