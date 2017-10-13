@@ -11,15 +11,16 @@ namespace BasicGarageSystem
     {
 
         public List<string> DisplayList { get; set; }
-
+        public GarageController gc { get; set; }
         public int Layer{ get; set;}
         public int CursorPos { get; set; }
 
 
-        public DisplayController()
+        public DisplayController(GarageController _gc)
         {
             DisplayList = new List<string>();
             Layer = 0;
+            GarageController gc = _gc;
         }
 
         public void WriteLine(string s) {
@@ -35,6 +36,10 @@ namespace BasicGarageSystem
         public void UpdateDisplay() {
 
             Console.Clear();
+            if(gc != null){ 
+                Console.WriteLine(gc.PrintAll());
+            }
+            Console.WriteLine("___________________________________________");
 
             int i = 0;
 
@@ -78,7 +83,7 @@ namespace BasicGarageSystem
 
         }
 
-        public int GetInput(int range) {
+        public int GetDirectionalInput(int range) {
 
             CursorPos = 0;
 

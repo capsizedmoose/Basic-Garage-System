@@ -12,13 +12,15 @@ namespace BasicGarageSystem
 
         static void MainMenu()
         {
-            DisplayController dc = new DisplayController();
+            GarageController gc = new GarageController();
+            DisplayController dc = new DisplayController(gc);
             new MenuMain(dc);
         }
 
 
         static void Main(string[] args)
         {
+            
             MainMenu();
         }
     }

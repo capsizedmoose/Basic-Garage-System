@@ -39,6 +39,7 @@ namespace BasicGarageSystem
                 {
                     double val = 0;
                     bool _x = double.TryParse(key.KeyChar.ToString(), out val);
+
                     if (_x || !digitsOnly) // if the output should be digits only, check _x.  otherwise just write it to the outputstring
                     {
                         output += key.KeyChar;

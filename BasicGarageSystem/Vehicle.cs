@@ -17,7 +17,7 @@ namespace BasicGarageSystem
 
         public override string ToString()
         {
-            return vehicleType + " : " + regNr + " : " + dateTime + " : " + parkingSpot + " : " + vehicleSize + " : ";
+            return vehicleType + " : " + regNr + " : " + dateTime + " : " + parkingSpot + " : " + vehicleSize + "\n";
         }
 
     }
