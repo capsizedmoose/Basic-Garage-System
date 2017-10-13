@@ -30,7 +30,7 @@ namespace BasicGarageSystem
     {
 
         List<Vehicle> m_Vehicles; // maybe make a new list class later? 
-        public List<string> M_Receipts;
+        List<string> m_Receipts;
         //Vehicle[] m_Vehicles; // array-version
         bool[,] m_ParkingSpaces; // Making it 2-dimensional instead, would be a really strange garage if it had like 100 adjecent parking spaces
         public int NumberOfParkingSpaces { get; set; }
@@ -48,7 +48,7 @@ namespace BasicGarageSystem
         public GarageController(int x = 10, int y = 25, double parkingFee = 50, int maximumHours = 24)
         {
             m_Vehicles = new List<Vehicle>();
-            M_Receipts = new List<string>();
+            m_Receipts = new List<string>();
             //m_Vehicles = new Vehicle[num]; // the array-version
             m_ParkingSpaces = new bool[x + 1, y + 1];
             NumberOfParkingSpaces = x * y;
@@ -77,19 +77,18 @@ namespace BasicGarageSystem
 
         // Prints out a single vehicle that matches the given registration number
         // takes argument: string regNr - the registration number for the vehicle
-        // returns a string with the return message of the method
+        // returns a string with all the info of the mathcing vehicle
         public string PrintVehicle(string regNr)
         {
             return m_Vehicles.Where(v => v.regNr == regNr).First().ToString();
         }
 
-        // !!This method is most likely redundant, but I'll leave it here anyway !!
         // Finds a specific vehicle with the given registration number 
         // takes argument: string reNr - the registration number
-        // returns a string with the return message of the method
+        // returns a string with basic info of the matching vehicle
         public string FindVehicle(string regNr)
         {
-            return PrintVehicle(regNr);
+            return m_Vehicles.Where(v => v.regNr == regNr).First().BasicInfo();
         }
 
         // Finds all vehicles of the given type
@@ -254,7 +253,7 @@ namespace BasicGarageSystem
                 $"left the garage, freeing up the parking space(s) {index.ToString()}" + (vehicle.vehicleSize > 1 ? $" to [{index.X + 1},{index.Y + vehicle.vehicleSize}]." : "." +
                 $"\nTotal hours parked: {GetTotalHours(vehicle)} and total price: {GetTotalPrice(vehicle)}.");
 
-            M_Receipts.Add(receipt);
+            m_Receipts.Add(receipt);
 
             return receipt;
         }
@@ -413,6 +412,12 @@ namespace BasicGarageSystem
             var values = Enum.GetValues(typeof(v_Vehicle));
 
             return (v_Vehicle)values.GetValue(randomNumber.Next(values.Length));
+        }
+
+        // Self-explanatory
+        public List<string> GetReceipts()
+        {
+            return m_Receipts;
         }
 
         // Help-method to generate a random registration number
