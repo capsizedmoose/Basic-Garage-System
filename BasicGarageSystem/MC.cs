@@ -12,7 +12,7 @@ namespace BasicGarageSystem
         {
 
             vehicleType = v_Vehicle.MC;
-            vehicleSize = '1';
+            vehicleSize = 1;
         }
     }
 }

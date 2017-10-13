@@ -44,7 +44,7 @@ namespace BasicGarageSystem
     }
     class MenuMain : Menu
     {
-        public MenuMain(DisplayController dc)
+        public MenuMain(DisplayController dc, GarageController gc)
         {
             Titel = "Main Menu:";
             Answers = new string[] {
@@ -61,12 +61,10 @@ namespace BasicGarageSystem
                 switch (nav)
                 {
                     case 1:
-                        new MenuCheckIn
-                            (dc);
+                        new MenuCheckIn(dc,gc);
                         break;
                     case 2:
-                        new MenuCheckIn
-                            (dc);
+                        new MenuCheckIn(dc,gc);
                         break;
 
                     case 0:
@@ -82,13 +80,12 @@ namespace BasicGarageSystem
     }
     class MenuSearchRegNr : Menu
     {
-        public MenuSearchRegNr(DisplayController dc)
+        public MenuSearchRegNr(DisplayController dc, GarageController gc)
         {
             Titel = "Search Registration Number";
             Answers = new string[] {
-                "Exit",
-                "Check In Vehicle",
-                "Search Registration Number",
+                "Back",
+                "Checkout" 
             };
             dc.Layer++;
             Length = Answers.Length;
@@ -100,11 +97,11 @@ namespace BasicGarageSystem
                 {
                     case 1:
                         new MenuCheckIn
-                            (dc);
+                            (dc,gc);
                         break;
                     case 2:
                         new MenuCheckIn
-                            (dc);
+                            (dc,gc);
                         break;
 
                     case 0:
@@ -120,12 +117,12 @@ namespace BasicGarageSystem
     }
     class MenuCheckIn : Menu
     {
-        public MenuCheckIn(DisplayController dc)
+        public MenuCheckIn(DisplayController dc, GarageController gc)
         {
             Titel = "Check In Vehicle:";
             Answers = new string[] {
                 "Back",
-                "DEEPER"
+                "Check in a random vehicle"
             };
             dc.Layer++;
             Length = Answers.Length;
@@ -136,7 +133,7 @@ namespace BasicGarageSystem
                 switch (nav)
                 {
                     case 1:
-                        new MenuCheckIn(dc);
+                        dc.InfoText = gc.ParkNewVehicle();
                         break;
                     case 0:
                         break;

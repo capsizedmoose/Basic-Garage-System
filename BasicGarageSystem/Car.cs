@@ -11,7 +11,7 @@ namespace BasicGarageSystem
         public Car()
         {
             vehicleType = v_Vehicle.Car;
-            vehicleSize = '1';
+            vehicleSize = 1;
         }
     }
 }

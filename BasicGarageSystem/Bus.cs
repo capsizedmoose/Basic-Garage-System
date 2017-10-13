@@ -11,7 +11,7 @@ namespace BasicGarageSystem
         public Bus()
         {
             vehicleType = v_Vehicle.Bus;
-            vehicleSize = '3';
+            vehicleSize = 3;
         }
            
     }

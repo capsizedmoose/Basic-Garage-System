@@ -14,7 +14,7 @@ namespace BasicGarageSystem
         {
             GarageController gc = new GarageController();
             DisplayController dc = new DisplayController(gc);
-            new MenuMain(dc);
+            new MenuMain(dc,gc);
         }
 
 

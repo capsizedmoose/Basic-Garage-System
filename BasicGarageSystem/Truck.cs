@@ -11,7 +11,7 @@ namespace BasicGarageSystem
         public Truck()
         {
             vehicleType = v_Vehicle.Truck;
-            vehicleSize = '3';
+            vehicleSize = 3;
         }
     }
 }
