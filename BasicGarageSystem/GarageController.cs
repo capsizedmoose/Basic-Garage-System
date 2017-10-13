@@ -80,7 +80,7 @@ namespace BasicGarageSystem
         // returns a string with all the info of the mathcing vehicle
         public string PrintVehicle(string regNr)
         {
-            return m_Vehicles.Where(v => v.regNr == regNr).First().ToString();
+            return m_Vehicles.Where(v => v != null && v.regNr == regNr).First().ToString();
         }
 
         // Finds a specific vehicle with the given registration number 
@@ -88,7 +88,7 @@ namespace BasicGarageSystem
         // returns a string with basic info of the matching vehicle
         public string FindVehicle(string regNr)
         {
-            return m_Vehicles.Where(v => v.regNr == regNr).First().BasicInfo();
+            return m_Vehicles.Where(v => v != null && v.regNr == regNr).First().BasicInfo();
         }
 
         // Finds all vehicles of the given type
