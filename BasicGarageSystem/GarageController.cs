@@ -6,32 +6,54 @@ using System.Threading.Tasks;
 
 namespace BasicGarageSystem
 {
+    // The different types of vehicles that can be used
     public enum v_Vehicle
     {
         Bus,
         Car,
         MC,
         Truck
-        
-        
     }
-
+    public class ParkingSpot
+    {
+        public int X { get; set; }
+        public int Y { get; set; }
+        // it looks too ugly if the numbers start at 0, so send them with +1
+        public override string ToString()
+        {
+            return $"[{X+1},{Y+1}]";
+        }
+    }
 
     class GarageController
     {
+
         List<Vehicle> m_Vehicles; // maybe make a new list class later? 
-        //Vehicle[] m_Vehicles; // will go with an array for now, since the garage doen't have an infinite amount of parking spaces
-        bool[] m_ParkingSpaces;
+        //Vehicle[] m_Vehicles; // array-version
+        bool[,] m_ParkingSpaces; // Making it 2-dimensional instead, would be a really strange garage if it had like 100 adjecent parking spaces
         public int NumberOfParkingSpaces { get; set; }
+        public double ParkingFee { get; set; }
+        public int MaximumHours { get; set; }
+        public int SizeX { get; set; }
+        public int SizeY { get; set; }
+        private Random randomNumber;
 
         // Constructor
-        // takes argument: int numberOfParkingSpaces - the total number of parking spaces in the garage (default is 100)
-        public GarageController(int num = 100)
+        // takes argument: int x - used to create the size of the garage (default is 5)
+        // takes argument: int y - used to create the size of the garage (default is 5)
+        // takes argument: double parkingFee - used to set the parking fee for the garage
+        // takes argument: int maximumHours - maximum number of hours allowed to park in the garage
+        public GarageController(int x = 10, int y = 25, double parkingFee = 50, int maximumHours = 24)
         {
             m_Vehicles = new List<Vehicle>();
-            //m_Vehicles = new Vehicle[num];
-            m_ParkingSpaces = new bool[num + 1];
-            NumberOfParkingSpaces = num;
+            //m_Vehicles = new Vehicle[num]; // the array-version
+            m_ParkingSpaces = new bool[x + 1, y + 1];
+            NumberOfParkingSpaces = x * y;
+            SizeX = x;
+            SizeY = y;
+            ParkingFee = parkingFee;
+            MaximumHours = maximumHours;
+            randomNumber = new Random();
         }
 
         // Prints out all vehicles in the list of vehicles
@@ -44,7 +66,7 @@ namespace BasicGarageSystem
             foreach (var vehicle in m_Vehicles.Where(x => x != null))
             {
                 // Maybe this method was only supposed to print basic information for all the vehicles?
-                text += vehicle.ToString();
+                text += vehicle.BasicInfo();
             }
 
             return text;
@@ -55,25 +77,36 @@ namespace BasicGarageSystem
         // returns a string with the return message of the method
         public string PrintVehicle(string regNr)
         {
-            var vehicle = m_Vehicles.Where(v => v.regNr == regNr);
-
-            return vehicle.ToString();
+            return m_Vehicles.Where(v => v.regNr == regNr).First().ToString();
         }
 
-        // Help method to get the number of free spaces
-        // takes no arguments
-        // returns and int with the number of free spaces
-        private int GetNumberOfFreeSpaces()
+        // !!This method is most likely redundant, but I'll leave it here anyway !!
+        // Finds a specific vehicle with the given registration number 
+        // takes argument: string reNr - the registration number
+        // returns a string with the return message of the method
+        public string FindVehicle(string regNr)
         {
-            return NumberOfParkingSpaces - m_Vehicles.Select(v => v.vehicleSize).Sum();
+            return PrintVehicle(regNr);
+        }
+
+        // Finds all vehicles of the given type
+        // takes argument: v_Vehicle type - the type of the vehicle
+        // returns a string with the return message of the method
+        public string FindVehiclesByType(v_Vehicle type)
+        {
+            string result = "";
+            foreach(var vehicle in m_Vehicles.Where(v => v.vehicleType == type))
+            {
+                result += vehicle.BasicInfo();
+            }
+            return result;
         }
 
         // Adds a new Vehicle to the list of Vehicles
-        // Creates a new Vehicle instance and assigns it the given registrattion number and vehicle type
-        // takes argument: string vehicleType - the type of the vehicle (maybe an enum instead? where type = number of vehicles, like Car = 4)
-        // takes argument: string regNr - the registration number for the vehicle
+        // Creates a new Vehicle instance and assigns it a free parking space if available
+        // takes no arguments
         // returns a string with the return message of the method
-        public string ParkVehicle(v_Vehicle vehicleType, string regNr)
+        public string ParkNewVehicle()
         {
             // Checks if the garage is full, so we can exit earlier if the garage is full
             if (NumberOfParkingSpaces == m_Vehicles.Count)
@@ -84,46 +117,81 @@ namespace BasicGarageSystem
             // Get the current date
             string dateNow = GetDate();
 
-            Vehicle vehicle; // the new behicle to be added
+            // the new vehicle to be added
+            Vehicle vehicle = GenerateRandomVehicle();
 
-            // Will be changed or removed with the new method to generate random vehicles
-            switch (vehicleType)
+            // Redundant since this is being checked in the method that generates a random vehicle, but I'll leave it in here anyway
+            if (GetVehicle(vehicle.regNr) != null)
             {
-                //
-                case v_Vehicle.MC:
-                    vehicle = new MC()
-                    {
-                        dateTime = dateNow,
-                        regNr = regNr
-                    };
-                    break;
-                //
-                case v_Vehicle.Car:
-                    vehicle = new Car()
-                    {
-                        dateTime = dateNow,
-                        regNr = regNr
-                    };
-                    break;
-                //
+                return $"A vehicle with the registration number: {vehicle.regNr} is already parked in the garage!";
+            }
+
+            // so we can exit earlier if there's not enough space in the garage
+            if (GetNumberOfFreeSpaces() < vehicle.vehicleSize)
+            {
+                return $"The garage is full!!.";
+            }
+
+            ParkingSpot index = FindFreeParkingSpace(vehicle.vehicleSize); // index used to find empty parking space  
+
+            // checks if we found a free parking space for the type of vehicle
+            if (index.X == -1 && index.Y == -1)
+            {
+                return $"Not enough empty spaces in the garage for a vehicle of type: { vehicle.vehicleType.ToString()}.";
+            }
+
+            // sets the found parking space(s) to occupied/true
+            for (int i = 0; i < vehicle.vehicleSize; i++)
+            {
+                m_ParkingSpaces[index.X, index.Y + i] = !m_ParkingSpaces[index.X, index.Y + i];
+            }
+            // assigns the vehicle its parking space
+            vehicle.parkingSpot = index;
+
+            // add the new vehicle to the list
+            m_Vehicles.Add(vehicle);
+
+            return $"The vehicle of the type: {vehicle.vehicleType.ToString()} " +
+                $"with the registration number: {vehicle.regNr} \nwas parked in the garage at " +
+                $"parking space(s): {index.ToString()}" + (vehicle.vehicleSize > 1 ? $" to [{index.X+1},{index.Y + vehicle.vehicleSize}]." : "");
+        }
+
+
+        // !Mainly used for manual testing with different vehicle types!
+        // Adds a new Vehicle to the list of Vehicles - 
+        // Creates a new Vehicle instance and assigns it a free parking space if available
+        // takes argument v_Vehicle - type of vehicle to be created
+        // returns a string with the return message of the method
+        public string ParkVehicle(v_Vehicle type)
+        {
+            // Checks if the garage is full, so we can exit earlier if the garage is full
+            if (NumberOfParkingSpaces == m_Vehicles.Count)
+            {
+                return $"The garage is full.";
+            }
+
+            // Get the current date
+            string dateNow = GetDate();
+
+            // the new vehicle to be added
+            Vehicle vehicle; // = GenerateRandomVehicle();
+
+            switch (type)
+            {
                 case v_Vehicle.Bus:
-                    vehicle = new Bus()
-                    {
-                        dateTime = dateNow,
-                        regNr = regNr
-                    };
+                    vehicle = new Bus() { regNr = getRandomRegNr(), dateTime = dateNow };
                     break;
-                //
+                case v_Vehicle.Car:
+                    vehicle = new Car() { regNr = getRandomRegNr(), dateTime = dateNow };
+                    break;
+                case v_Vehicle.MC:
+                    vehicle = new MC() { regNr = getRandomRegNr(), dateTime = dateNow };
+                    break;
                 case v_Vehicle.Truck:
-                    vehicle = new Truck()
-                    {
-                        dateTime = dateNow,
-                        regNr = regNr
-                    };
+                    vehicle = new Truck() { regNr = getRandomRegNr(), dateTime = dateNow };
                     break;
-                //
                 default:
-                    vehicle = new Vehicle();
+                    vehicle = null;
                     break;
             }
 
@@ -133,34 +201,9 @@ namespace BasicGarageSystem
                 return $"The garage is full!!.";
             }
 
-            int index = 0; // index used to find empty parking space
-            bool foundSpace = false; //
-
-            while (index < (NumberOfParkingSpaces - (vehicle.vehicleSize - 1)))
-            {
-                if (!m_ParkingSpaces[index]) // Checks if the parking space is taken
-                {
-                    // Checks if the vehicle will actually fit in the free parking space
-                    for (int i = 0; i < vehicle.vehicleSize; i++)
-                    {
-                        if (m_ParkingSpaces[index + i])
-                        {
-                            foundSpace = false; // if it can't fit; then we haven't found a free parking space
-                            break;
-                        }
-                        foundSpace = true; // if it can fit; we have found a free parking space
-                    }
-                }
-                if (foundSpace)
-                {
-                    break; // to escape the while-loop when we first find a free parking space
-                }
-
-                index++;
-            }
-
-            // checks if we exited the while-loop without finding a free parking space
-            if (!foundSpace)
+            ParkingSpot index = FindFreeParkingSpace(vehicle.vehicleSize); // index used to find empty parking space  
+            // checks if we found a free parking space for the type of vehicle
+            if (index.X == -1 && index.Y == -1)
             {
                 return $"Not enough empty spaces in the garage for a vehicle of type: { vehicle.vehicleType.ToString()}.";
             }
@@ -168,39 +211,43 @@ namespace BasicGarageSystem
             // sets the found parking space(s) to occupied/true
             for (int i = 0; i < vehicle.vehicleSize; i++)
             {
-                m_ParkingSpaces[index + i] = true;
+                m_ParkingSpaces[index.X, index.Y + i] = !m_ParkingSpaces[index.X, index.Y + i];
             }
             // assigns the vehicle its parking space
             vehicle.parkingSpot = index;
 
-            // add the new vehicle tpo the list
+            // add the new vehicle to the list
             m_Vehicles.Add(vehicle);
 
-            return $"The vehicle with the registration number {regNr} was parked in the garage at parking space(s): {index} to {index + vehicle.parkingSpot}.";
+            return $"The vehicle of the type: {vehicle.vehicleType.ToString()} " +
+                $"with the registration number: {vehicle.regNr} \nwas parked in the garage at " +
+                $"parking space(s): {index.ToString()}" + (vehicle.vehicleSize > 1 ? $" to [{index.X+1},{index.Y + vehicle.vehicleSize}]." : "");
         }
 
         // Removes a Vehicle from the list of Vehicles
         //
         // takes argument: string regNr - the registration number for the vehicle
         // returns a string with the return message of the method
-        public string CheckOutVehicle(string regNr)
+        public string VehicleCheckout(string regNr)
         {
             var vehicle = GetVehicle(regNr);
 
             if (vehicle == null)
             {
-                return $"No vehicle with the reigstration number: {regNr}.";
+                return $"No vehicle found with the reigstration number: {regNr}.";
             }
+            ParkingSpot index = vehicle.parkingSpot;
 
             // Free the occupied parking spaces
             for (int i = 0; i < vehicle.vehicleSize; i++)
             {
-                m_ParkingSpaces[vehicle.parkingSpot + i] = !m_ParkingSpaces[vehicle.parkingSpot + i];
+                m_ParkingSpaces[index.X, index.Y + i] = !m_ParkingSpaces[index.X, index.Y + i];
             }
+            
+            m_Vehicles = m_Vehicles.Where(v => v.regNr != regNr).ToList(); // remove the vehicle from the list;
 
-            m_Vehicles = m_Vehicles.Where(v => v.regNr != regNr).ToList(); // remove to vehicle from the list;
-
-            return $"The vehicle with the registration number: {regNr} left the garage, freeing up the parking spaces {vehicle.parkingSpot} to {vehicle.parkingSpot + vehicle.vehicleSize}.";
+            return $"The vehicle with the registration number: {regNr} " +
+                $"left the garage, freeing up the parking space(s) {index.ToString()}" + (vehicle.vehicleSize > 1 ? $" to [{index.X+1},{index.Y + vehicle.vehicleSize}]." : "");
         }
 
         // Views how long a vehicle has been parked, and what the total price of the paarking fee is
@@ -213,30 +260,80 @@ namespace BasicGarageSystem
 
             if (vehicle == null)
             {
-                return $"No vehicle with the reigstration number: {regNr}.";
+                return $"No vehicle found with the reigstration number: {regNr}.";
             }
 
-
             var parkedDate = DateTime.ParseExact(vehicle.dateTime, "yyyy-MM-dd HH:mm", System.Globalization.CultureInfo.InstalledUICulture);
+            // Total hours parked rounded up, so can never park (or pay) for less than one hour
             int totalHours = (int)(DateTime.Now - parkedDate).TotalHours + 1;
-            double totalPrice = totalHours * vehicle.vehicleSize * 50;
 
-            return ($"Registration number: {regNr} parked for a total of {totalHours} hours. Total price: {totalPrice}.");
+            // Total price, just at placeholder atm
+            double totalPrice = totalHours * vehicle.vehicleSize * ParkingFee;
+
+            return ($"Vehicle with registration number: {regNr} is parked at {vehicle.parkingSpot.ToString()} " + 
+                (vehicle.vehicleSize > 1 ? $" to [{vehicle.parkingSpot.X + 1},{vehicle.parkingSpot.Y + vehicle.vehicleSize}]" : "" ) +
+                $" and has parked for a total of {totalHours} hours (rounded up). Total price: {totalPrice}.");
         }
-        // Help-method to check if there are any free parking spacesa string with the current date
-        // takes no arguments
-        // returns in int with the number of free parking spaces
-        private int FindFreeParkingSpace()
-        {
-            int index = 0;
-            while (index < NumberOfParkingSpaces && !m_ParkingSpaces[index++]) ;
 
-            return (index == NumberOfParkingSpaces) ? -1 : index;
+
+        // Test method that views all the vehicles and removes them from the garage
+        public void RemoveAllVehicles()
+        {
+            // I'm really starting to like LINQ!
+            foreach (var regNr in m_Vehicles.Select(v => v.regNr))
+            {
+                Console.WriteLine($"\n{ViewParkedVehicle(regNr)}");
+                Console.WriteLine(VehicleCheckout(regNr));
+            }
+        }
+
+        // Help-method to get the number of free spaces
+        // takes no arguments
+        // returns an int with the number of free spaces
+        private int GetNumberOfFreeSpaces()
+        {
+            return NumberOfParkingSpaces - m_Vehicles.Select(v => v.vehicleSize).Sum();
+        }
+
+        // Help-method to check if there are any free parking spacesa
+        // takes no arguments
+        // returns a PakringSpot with the free parking spot if one is found, otherwise it will have X = -1 and Y = -1
+        private ParkingSpot FindFreeParkingSpace(int vehicleSize)
+        {
+            bool found = false;
+            ParkingSpot ParkingSpot = new ParkingSpot() {X = -1, Y = -1 };
+            for (int i = 0; i < SizeX; i++)
+            {
+                for (int j = 0; j < SizeY - (vehicleSize - 1); j++)
+                {
+                    if (!m_ParkingSpaces[i, j]) // Checks if the parking space is taken
+                    {
+                        // Checks if the vehicle will actually fit in the free parking space
+                        for (int k = 0; k < vehicleSize; k++)
+                        {
+                            if (m_ParkingSpaces[i, j + k])
+                            {
+                                found = false; // if it can't fit; then we haven't found a free parking space
+                                break;
+                            }
+                            found = true; // if it can fit; we have found a free parking space
+                        }
+                    }
+                    if (found)
+                    {
+                        ParkingSpot.X = i;
+                        ParkingSpot.Y = j;
+                        return ParkingSpot;
+                    }
+                }
+            }
+
+            return ParkingSpot;
         }
 
         // Help-method to get a string with the current date
         // takes no arguments
-        // returns a string with the date
+        // returns a string with the date formated like: yyyy-MM-dd HH:mm
         private string GetDate()
         {
             return DateTime.Now.ToString("yyyy-MM-dd HH:mm");
@@ -250,6 +347,67 @@ namespace BasicGarageSystem
             var query = m_Vehicles.Where(v => v != null && v.regNr == regNr);
 
             return (query.Count() > 0 ? query.First() : null);
+        }
+
+        // Help-method to generate a random vehicle  
+        // takes no arguments
+        // returns the generated Vehicle 
+        private Vehicle GenerateRandomVehicle()
+        {
+            string regNr;
+            while (GetVehicle(regNr = getRandomRegNr()) != null) ; // Find a regNr that isn't already used by a vehicle in the garage
+
+            v_Vehicle type = GetRandomVehicleType();
+            string now = GetDate();
+
+            switch (type)
+            {
+                case v_Vehicle.Bus:
+                    return new Bus() { regNr = regNr, dateTime = now };
+                case v_Vehicle.Car:
+                    return new Car() { regNr = regNr, dateTime = now, };
+                case v_Vehicle.MC:
+                    return new MC() { regNr = regNr, dateTime = now, };
+                case v_Vehicle.Truck:
+                    return new Truck() { regNr = regNr, dateTime = now, };
+                default:
+                    return null;
+            }
+        }
+
+        // Help-method to generate a random vehicle type  
+        // takes no arguments
+        // returns a v_Vehicle with the vehicle type 
+        public v_Vehicle GetRandomVehicleType()
+        {
+            var values = Enum.GetValues(typeof(v_Vehicle));
+
+            return (v_Vehicle)values.GetValue(randomNumber.Next(values.Length));
+        }
+
+        // Help-method to generate a random registration number
+        // takes no arguments
+        // returns a string with the generated registration number
+        public string getRandomRegNr()
+        {
+            int num;
+            string regNum = "";
+
+            for (int i = 0; i < 3; i++)
+            {
+                num = randomNumber.Next(97, 122);
+                regNum += (char)num;
+            }
+
+            for (int i = 0; i < 3; i++)
+            {
+                num = randomNumber.Next(0, 9);
+                regNum += num;
+            }
+            //Console.WriteLine(regNum.ToUpper());
+
+            return regNum.ToUpper();
+
         }
 
         // Extra stuff for later
@@ -266,29 +424,6 @@ namespace BasicGarageSystem
         // returns: nothing (void)
         public void LoadGarageFromFile()
         {
-
-        }
-
-        public string getRandomRegNr()
-        {
-            Random randomNumber = new Random();
-            int num;
-            string regNum = "";
-
-            for (int i = 0; i < 3; i++)
-            {
-                num = randomNumber.Next(97, 122);
-                regNum += (char)num;
-            }
-
-            for (int i = 0; i < 3; i++)
-            {
-                num = randomNumber.Next(0, 9);
-                regNum += num;
-            }
-            Console.WriteLine(regNum.ToUpper());
-
-            return regNum.ToUpper();
 
         }
     }
