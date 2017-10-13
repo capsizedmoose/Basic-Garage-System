@@ -45,11 +45,66 @@ namespace BasicGarageSystem
 
     class MenuVehicles : Menu
     {
-        public MenuVehicles(DisplayController dc, GarageController gc, string[] vehicles)
+        public MenuVehicles(DisplayController dc, GarageController gc, v_Vehicle type)
         {
-            Titel = "Main Menu:";
-            Answers = new string[vehicles.Length + 1];
-            new string
+            int nav = 0;
+            do
+            {
+                string[] vehicles = gc.FindVehiclesByType(type).ToArray();
+                Titel = "Choose Vehicle:";
+                Answers = new string[vehicles.Length+1];
+                Answers[0] = "Back";
+                vehicles.CopyTo(Answers, 1);
+                dc.Layer++;
+                Length = Answers.Length;
+                nav = GetAnswer(dc);
+                if (nav != 0)
+                {
+                    new MenuThisVehicle(dc,gc,Answers[nav]);
+                }
+                dc.RemoveLine();
+                dc.UpdateDisplay();
+                dc.Layer--;
+                dc.UpdateDisplay();
+            } while (nav != 0);
+        }
+    }
+    class MenuThisVehicle : Menu
+    {
+        public MenuThisVehicle(DisplayController dc, GarageController gc, string vehicle)
+        {
+            Titel = vehicle;
+            Answers = new string[] {
+                "Back",
+                "Get Info",
+                "Check out",
+            };
+            dc.Layer++;
+            Length = Answers.Length;
+            int nav = 0;
+            do
+            {
+                nav = GetAnswer(dc);
+                switch (nav)
+                {
+                    case 1:
+                        dc.InfoText = gc.ViewParkedVehicle(Titel.Substring(0,6));
+                        break;
+                    case 2:
+                        dc.InfoText = gc.VehicleCheckout(Titel.Substring(0, 6));
+                        dc.RemoveLine();
+                        dc.Layer--;
+                        dc.UpdateDisplay();
+                        return;
+                    case 0:
+                    default:
+                        break;
+                }
+                dc.RemoveLine();
+                dc.UpdateDisplay();
+            } while (nav != 0);
+            dc.Layer--;
+            dc.UpdateDisplay();
         }
     }
 
@@ -65,17 +120,6 @@ namespace BasicGarageSystem
             };
             dc.Layer++;
             Length = Answers.Length;
-
-
-            dc.WriteLine(Titel);
-            string searchString = GetInput(false);
-
-
-
-
-
-
-
             int nav = 0;
             do
             {
@@ -86,7 +130,7 @@ namespace BasicGarageSystem
                         new MenuCheckIn(dc,gc);
                         break;
                     case 2:
-                        new MenuMain(dc,gc);
+                        new MenuSearch(dc,gc);
                         break;
 
                     case 0:
@@ -101,14 +145,18 @@ namespace BasicGarageSystem
         }
     }
 
-    class MenuSearchRegNr : Menu
+
+
+    class MenuSearch : Menu
     {
-        public MenuSearchRegNr(DisplayController dc, GarageController gc)
+        public MenuSearch(DisplayController dc, GarageController gc)
         {
-            Titel = "Search By Regnr";
+            Titel = "Search For Vehicle:";
             Answers = new string[] {
                 "Back",
-                "Checkout" 
+                "Search By Type",
+                "Search For A Specific Vehicle",
+                "Search Trough All Vehicles"
             };
             dc.Layer++;
             Length = Answers.Length;
@@ -119,12 +167,10 @@ namespace BasicGarageSystem
                 switch (nav)
                 {
                     case 1:
-                        new MenuCheckIn
-                            (dc,gc);
+                        new MenuSearchType(dc, gc);
                         break;
                     case 2:
-                        new MenuCheckIn
-                            (dc,gc);
+                        new MenuSearchRegNr(dc, gc);
                         break;
 
                     case 0:
@@ -134,6 +180,49 @@ namespace BasicGarageSystem
                 dc.RemoveLine();
                 dc.UpdateDisplay();
             } while (nav != 0);
+            dc.Layer--;
+            dc.UpdateDisplay();
+        }
+    }
+
+    class MenuSearchType : Menu
+    {
+        public MenuSearchType(DisplayController dc, GarageController gc)
+        {
+            int nav = 0;
+            do
+            {
+                Titel = "Search By Type:";
+                Answers = new string[Enum.GetNames(typeof(v_Vehicle)).Length+1];
+                Answers[0] = "Back";
+                Enum.GetNames(typeof(v_Vehicle)).CopyTo(Answers,1);
+                dc.Layer++;
+                Length = Answers.Length;
+                nav = GetAnswer(dc);
+                if (nav != 0){
+                    
+                    new MenuVehicles(dc, gc,(v_Vehicle)nav-1);
+                }
+                dc.RemoveLine();
+                dc.UpdateDisplay();
+                dc.Layer--;
+                dc.UpdateDisplay();
+            } while (nav != 0);
+        }
+    }
+    class MenuSearchRegNr : Menu
+    {
+        public MenuSearchRegNr(DisplayController dc, GarageController gc)
+        {
+            Titel = "Search By Regnr";
+            dc.Layer++;
+            dc.WriteLine(Titel);
+            dc.UpdateDisplay();
+            string searchString = GetInput(false);
+            if (gc.FindVehicle(searchString.ToUpper()) != null) {
+                new MenuThisVehicle(dc,gc,gc.FindVehicle(searchString.ToUpper()));
+            }
+            dc.RemoveLine();
             dc.Layer--;
             dc.UpdateDisplay();
         }

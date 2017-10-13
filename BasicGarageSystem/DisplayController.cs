@@ -40,7 +40,7 @@ namespace BasicGarageSystem
 
 
             CngBCol(ConsoleColor.Black);
-            CngFCol(ConsoleColor.Gray);
+            CngFCol(ConsoleColor.White);
             Console.WriteLine("___________________________________________");
             Console.WriteLine(InfoText);
             Console.WriteLine("___________________________________________");
@@ -87,7 +87,7 @@ namespace BasicGarageSystem
             Console.WriteLine("___________________________________________");
 
             CngBCol(ConsoleColor.Black);
-            CngFCol(ConsoleColor.);
+            CngFCol(ConsoleColor.White);
             if (gc != null)
             {
                 int temp = 0;
