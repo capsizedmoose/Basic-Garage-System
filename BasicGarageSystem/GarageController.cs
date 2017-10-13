@@ -59,17 +59,17 @@ namespace BasicGarageSystem
         // Prints out all vehicles in the list of vehicles
         // takes: no arguments
         // returns a string with the return message of the method
-        public string PrintAll()
+        public List<string> PrintAll()
         {
-            string text = "";
+            var vehicleStrings = new List<string>();
 
             foreach (var vehicle in m_Vehicles.Where(x => x != null))
             {
                 // Maybe this method was only supposed to print basic information for all the vehicles?
-                text += vehicle.BasicInfo();
+                vehicleStrings.Add(vehicle.BasicInfo());
             }
 
-            return text;
+            return vehicleStrings;
         }
 
         // Prints out a single vehicle that matches the given registration number
